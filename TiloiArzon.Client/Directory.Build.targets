@@ -1,0 +1,20 @@
+<Project>
+  <!--
+    Workaround for environments where MSBuild task host servers are unavailable.
+    The WebAssembly SDK declares these tasks with TaskFactory="TaskHostFactory", which can fail
+    if the required task host infrastructure is missing. Re-declare them without a task factory
+    so they can run in-proc.
+  -->
+  <UsingTask TaskName="Microsoft.NET.Sdk.WebAssembly.GenerateWasmBootJson"
+             AssemblyFile="$(_WebAssemblySdkTasksAssembly)"
+             Condition="Exists('$(_WebAssemblySdkTasksAssembly)')" />
+  <UsingTask TaskName="Microsoft.NET.Sdk.WebAssembly.ComputeWasmBuildAssets"
+             AssemblyFile="$(_WebAssemblySdkTasksAssembly)"
+             Condition="Exists('$(_WebAssemblySdkTasksAssembly)')" />
+  <UsingTask TaskName="Microsoft.NET.Sdk.WebAssembly.ComputeWasmPublishAssets"
+             AssemblyFile="$(_WebAssemblySdkTasksAssembly)"
+             Condition="Exists('$(_WebAssemblySdkTasksAssembly)')" />
+  <UsingTask TaskName="Microsoft.NET.Sdk.WebAssembly.ConvertDllsToWebCil"
+             AssemblyFile="$(_WebAssemblySdkTasksAssembly)"
+             Condition="Exists('$(_WebAssemblySdkTasksAssembly)')" />
+</Project>

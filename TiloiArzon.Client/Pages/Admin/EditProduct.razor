@@ -1,0 +1,183 @@
+@page "/admin/products/{Id:int}/edit"
+@layout AdminLayout
+@attribute [Authorize(Roles = "Admin")]
+@using System.ComponentModel.DataAnnotations
+@inject ProductsApi ProductsApi
+@inject CategoriesApi CategoriesApi
+@inject AdminProductsApi AdminProductsApi
+@inject NavigationManager Nav
+@inject AppUrls Urls
+
+<h1>Edit product</h1>
+<p class="muted">Update details, price, stock, and image.</p>
+
+<LoadingState Show="@_loading" />
+
+@if (!_loading)
+{
+    if (_product == null)
+    {
+        <EmptyState Title="Product not found" />
+    }
+    else
+    {
+        <div class="card card-pad">
+            <EditForm Model="_model" OnValidSubmit="OnSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="grid">
+                    <div style="grid-column: span 6;">
+                        <div class="field">
+                            <label>Name</label>
+                            <InputText class="input" @bind-Value="_model.Name" />
+                        </div>
+                    </div>
+                    <div style="grid-column: span 3;">
+                        <div class="field">
+                            <label>Price</label>
+                            <InputNumber class="input" @bind-Value="_model.Price" />
+                        </div>
+                    </div>
+                    <div style="grid-column: span 3;">
+                        <div class="field">
+                            <label>Stock</label>
+                            <InputNumber class="input" @bind-Value="_model.StockQuantity" />
+                        </div>
+                    </div>
+
+                    <div style="grid-column: span 6;">
+                        <div class="field">
+                            <label>Category</label>
+                            <select class="select" @bind="_model.CategoryId">
+                                @foreach (var c in _categories)
+                                {
+                                    <option value="@c.Id">@c.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="grid-column: span 6;">
+                        <div class="field">
+                            <label>Image</label>
+                            <InputFile OnChange="OnFile" />
+                            <img src="@PreviewImage" alt="Preview" style="width:100%; max-height:280px; object-fit:cover; border-radius:14px; border:1px solid rgba(255,255,255,0.10);" />
+                        </div>
+                    </div>
+
+                    <div style="grid-column: span 12;">
+                        <div class="field">
+                            <label>Description</label>
+                            <InputTextArea class="input" @bind-Value="_model.Description" />
+                        </div>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(_error))
+                {
+                    <div class="alert alert-danger">@_error</div>
+                }
+
+                <div style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+                    <button class="btn btn-ghost" type="button" @onclick="@(() => Nav.NavigateTo("/admin/products"))">Back</button>
+                    <button class="btn btn-primary" disabled="@_busy" type="submit">@(_busy ? "Saving..." : "Save")</button>
+                </div>
+            </EditForm>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private bool _loading = true;
+    private bool _busy;
+    private string? _error;
+    private IBrowserFile? _file;
+    private string? _previewData;
+
+    private TiloiArzon.Client.Models.ProductDto? _product;
+    private List<TiloiArzon.Client.Models.CategoryDto> _categories = new();
+    private EditModel _model = new();
+
+    private string PreviewImage =>
+        !string.IsNullOrWhiteSpace(_previewData) ? _previewData! :
+        string.IsNullOrWhiteSpace(_product?.ImageUrl) ? "/images/default-product.svg" : Urls.ResolveApiRelative(_product!.ImageUrl);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        _categories = await CategoriesApi.GetAllAsync();
+        _product = await ProductsApi.GetByIdAsync(Id);
+
+        if (_product != null)
+        {
+            _model = new EditModel
+            {
+                Name = _product.Name,
+                Price = _product.Price,
+                StockQuantity = _product.StockQuantity,
+                CategoryId = _product.CategoryId,
+                Description = _product.Description
+            };
+        }
+
+        _loading = false;
+    }
+
+    private async Task OnFile(InputFileChangeEventArgs e)
+    {
+        _file = e.File;
+        var buffer = new byte[_file.Size];
+        await _file.OpenReadStream(_file.Size).ReadAsync(buffer);
+        _previewData = $"data:{_file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+    }
+
+    private async Task OnSubmit()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            var updated = await AdminProductsApi.UpdateAsync(Id, new TiloiArzon.Client.Models.CreateProductRequest
+            {
+                Name = _model.Name,
+                Price = _model.Price,
+                StockQuantity = _model.StockQuantity,
+                CategoryId = _model.CategoryId,
+                Description = _model.Description,
+                ImageFile = _file
+            });
+
+            if (updated == null)
+            {
+                _error = "Failed to save product.";
+                return;
+            }
+
+            Nav.NavigateTo("/admin/products");
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private sealed class EditModel
+    {
+        [Required, MinLength(2)]
+        public string Name { get; set; } = string.Empty;
+
+        [Range(0.01, 999999)]
+        public decimal Price { get; set; }
+
+        [Range(0, 999999)]
+        public int StockQuantity { get; set; }
+
+        [Range(1, int.MaxValue)]
+        public int CategoryId { get; set; }
+
+        public string? Description { get; set; }
+    }
+}

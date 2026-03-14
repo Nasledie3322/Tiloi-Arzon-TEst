@@ -1,0 +1,9 @@
+<Project>
+  <!-- Disable NuGet audit in offline/restricted environments to avoid NU1900 causing failing builds. -->
+  <PropertyGroup>
+    <NuGetAudit>false</NuGetAudit>
+    <UseSharedCompilation>false</UseSharedCompilation>
+    <!-- In this environment, nuget.org may be blocked. Allow restore to succeed using cached packages. -->
+    <RestoreIgnoreFailedSources>true</RestoreIgnoreFailedSources>
+  </PropertyGroup>
+</Project>

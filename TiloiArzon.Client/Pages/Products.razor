@@ -1,0 +1,117 @@
+@page "/products"
+@inject ProductsApi ProductsApi
+@inject CategoriesApi CategoriesApi
+@inject CartApi CartApi
+@inject FavoritesApi FavoritesApi
+@inject NavigationManager Nav
+
+<h1>Products</h1>
+<p class="muted">Browse and add items to your cart.</p>
+
+<div class="card card-pad">
+    <div class="grid" style="align-items:end;">
+        <div style="grid-column: span 7;">
+            <div class="field">
+                <label>Search</label>
+                <InputText class="input" @bind-Value="_searchTerm" @bind-Value:event="oninput" />
+            </div>
+        </div>
+        <div style="grid-column: span 3;">
+            <div class="field">
+                <label>Category</label>
+                <select class="select" @onchange="OnCategoryChanged">
+                    <option value="">All</option>
+                    @foreach (var c in _categories)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div style="grid-column: span 2;">
+            <button class="btn btn-primary w-100" @onclick="Reload" disabled="@_loading">Apply</button>
+        </div>
+    </div>
+</div>
+
+<div style="height:14px"></div>
+
+<LoadingState Show="@_loading" />
+
+@if (!_loading)
+{
+    if (_products.Count == 0)
+    {
+        <EmptyState Title="No matching products" Description="Try a different search term or category." />
+    }
+    else
+    {
+        <div class="products-grid">
+            @foreach (var p in _products)
+            {
+                <ProductCard Product="p" Disabled="@_busy"
+                             OnAddToCart="AddToCart"
+                             OnToggleFavorite="ToggleFavorite" />
+            }
+        </div>
+    }
+}
+
+@code {
+    private bool _loading = true;
+    private bool _busy;
+    private string? _searchTerm;
+    private int? _categoryId;
+    private List<TiloiArzon.Client.Models.ProductDto> _products = new();
+    private List<TiloiArzon.Client.Models.CategoryDto> _categories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _categories = await CategoriesApi.GetAllAsync();
+        await Reload();
+    }
+
+    private async Task Reload()
+    {
+        _loading = true;
+        StateHasChanged();
+        _products = await ProductsApi.GetAllAsync(_searchTerm, _categoryId);
+        _loading = false;
+    }
+
+    private Task OnCategoryChanged(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        _categoryId = int.TryParse(value, out var id) ? id : null;
+        return Task.CompletedTask;
+    }
+
+    private async Task AddToCart(TiloiArzon.Client.Models.ProductDto product)
+    {
+        _busy = true;
+        try
+        {
+            var items = await CartApi.AddAsync(product.Id, 1);
+            if (items.Count == 0) Nav.NavigateTo("/login");
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task ToggleFavorite(TiloiArzon.Client.Models.ProductDto product)
+    {
+        _busy = true;
+        try
+        {
+            var ok = await FavoritesApi.AddAsync(product.Id);
+            if (!ok) Nav.NavigateTo("/login");
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}
+

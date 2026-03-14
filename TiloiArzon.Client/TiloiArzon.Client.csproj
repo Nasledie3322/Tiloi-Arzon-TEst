@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.3" />
+  </ItemGroup>
+
+  <!--
+    `dotnet build` runs restore with default item includes disabled (via restore properties).
+    Ensure the restore-time project evaluation still sees the project files it needs.
+  -->
+  <ItemGroup Condition="'$(EnableDefaultCompileItems)' == 'false'">
+    <Compile Include="**/*.cs" Exclude="bin/**;obj/**" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(EnableDefaultNoneItems)' == 'false'">
+    <RazorComponent Include="**/*.razor" Exclude="bin/**;obj/**" />
+    <Content Include="wwwroot/**" Exclude="bin/**;obj/**" />
+    <None Include="**/*" Exclude="bin/**;obj/**;**/*.cs;**/*.razor" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,156 @@
+@page "/admin/products/new"
+@layout AdminLayout
+@attribute [Authorize(Roles = "Admin")]
+@using System.ComponentModel.DataAnnotations
+@inject AdminProductsApi AdminProductsApi
+@inject CategoriesApi CategoriesApi
+@inject NavigationManager Nav
+
+<h1>Create product</h1>
+<p class="muted">Add a new product to the catalog.</p>
+
+<LoadingState Show="@_loading" />
+
+@if (!_loading)
+{
+    <div class="card card-pad">
+        <EditForm Model="_model" OnValidSubmit="OnSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="grid">
+                <div style="grid-column: span 6;">
+                    <div class="field">
+                        <label>Name</label>
+                        <InputText class="input" @bind-Value="_model.Name" />
+                    </div>
+                </div>
+                <div style="grid-column: span 3;">
+                    <div class="field">
+                        <label>Price</label>
+                        <InputNumber class="input" @bind-Value="_model.Price" />
+                    </div>
+                </div>
+                <div style="grid-column: span 3;">
+                    <div class="field">
+                        <label>Stock</label>
+                        <InputNumber class="input" @bind-Value="_model.StockQuantity" />
+                    </div>
+                </div>
+
+                <div style="grid-column: span 6;">
+                    <div class="field">
+                        <label>Category</label>
+                        <select class="select" @bind="_model.CategoryId">
+                            @foreach (var c in _categories)
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div style="grid-column: span 6;">
+                    <div class="field">
+                        <label>Image</label>
+                        <InputFile OnChange="OnFile" />
+                        @if (!string.IsNullOrWhiteSpace(_preview))
+                        {
+                            <img src="@_preview" alt="Preview" style="width:100%; max-height:280px; object-fit:cover; border-radius:14px; border:1px solid rgba(255,255,255,0.10);" />
+                        }
+                    </div>
+                </div>
+
+                <div style="grid-column: span 12;">
+                    <div class="field">
+                        <label>Description</label>
+                        <InputTextArea class="input" @bind-Value="_model.Description" />
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <div class="alert alert-danger">@_error</div>
+            }
+
+            <div style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+                <button class="btn btn-ghost" type="button" @onclick="@(() => Nav.NavigateTo("/admin/products"))">Cancel</button>
+                <button class="btn btn-primary" disabled="@_busy" type="submit">@(_busy ? "Creating..." : "Create")</button>
+            </div>
+        </EditForm>
+    </div>
+}
+
+@code {
+    private bool _loading = true;
+    private bool _busy;
+    private string? _error;
+    private string? _preview;
+    private IBrowserFile? _file;
+    private List<TiloiArzon.Client.Models.CategoryDto> _categories = new();
+    private CreateModel _model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _categories = await CategoriesApi.GetAllAsync();
+        if (_categories.Count > 0) _model.CategoryId = _categories[0].Id;
+        _loading = false;
+    }
+
+    private async Task OnFile(InputFileChangeEventArgs e)
+    {
+        _file = e.File;
+        var buffer = new byte[_file.Size];
+        await _file.OpenReadStream(_file.Size).ReadAsync(buffer);
+        _preview = $"data:{_file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+    }
+
+    private async Task OnSubmit()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            var created = await AdminProductsApi.CreateAsync(new TiloiArzon.Client.Models.CreateProductRequest
+            {
+                Name = _model.Name,
+                Price = _model.Price,
+                StockQuantity = _model.StockQuantity,
+                CategoryId = _model.CategoryId,
+                Description = _model.Description,
+                ImageFile = _file
+            });
+
+            if (created == null)
+            {
+                _error = "Failed to create product. Make sure you are logged in as Admin.";
+                return;
+            }
+
+            Nav.NavigateTo("/admin/products");
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private sealed class CreateModel
+    {
+        [Required, MinLength(2)]
+        public string Name { get; set; } = string.Empty;
+
+        [Range(0.01, 999999)]
+        public decimal Price { get; set; } = 1;
+
+        [Range(0, 999999)]
+        public int StockQuantity { get; set; } = 10;
+
+        [Range(1, int.MaxValue)]
+        public int CategoryId { get; set; }
+
+        public string? Description { get; set; }
+    }
+}
+

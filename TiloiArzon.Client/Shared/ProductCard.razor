@@ -1,0 +1,52 @@
+@using TiloiArzon.Client.Models
+@inject AppUrls Urls
+@inject NavigationManager Nav
+
+<div class="product-card">
+    <button class="product-media" @onclick="Open">
+        <img src="@Image" alt="@Product.Name" loading="lazy" />
+    </button>
+
+    <div class="product-body">
+        <div class="product-name" title="@Product.Name">@Product.Name</div>
+        <div class="product-meta">
+            <span class="price">@Product.Price.ToString("C")</span>
+            @if (!string.IsNullOrWhiteSpace(Product.CategoryName))
+            {
+                <span class="badge">@Product.CategoryName</span>
+            }
+            @if (Product.StockQuantity <= 0)
+            {
+                <span class="badge" style="border-color: rgba(239,68,68,0.35); color: #fecaca;">Out of stock</span>
+            }
+            else
+            {
+                <span class="badge">Stock: @Product.StockQuantity</span>
+            }
+        </div>
+
+        <div class="product-actions">
+            <button class="btn btn-primary" disabled="@(Disabled || Product.StockQuantity <= 0)" @onclick="AddToCart">
+                @(Product.StockQuantity <= 0 ? "Unavailable" : "Add to cart")
+            </button>
+            <button class="btn btn-ghost" disabled="@Disabled" @onclick="ToggleFavorite">
+                Favorite
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ProductDto Product { get; set; } = default!;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<ProductDto> OnAddToCart { get; set; }
+    [Parameter] public EventCallback<ProductDto> OnToggleFavorite { get; set; }
+
+    private string Image => string.IsNullOrWhiteSpace(Product.ImageUrl)
+        ? "/images/default-product.svg"
+        : Urls.ResolveApiRelative(Product.ImageUrl);
+
+    private void Open() => Nav.NavigateTo($"/products/{Product.Id}");
+    private Task AddToCart() => OnAddToCart.InvokeAsync(Product);
+    private Task ToggleFavorite() => OnToggleFavorite.InvokeAsync(Product);
+}

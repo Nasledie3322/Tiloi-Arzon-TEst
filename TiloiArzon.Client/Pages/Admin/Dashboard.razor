@@ -1,0 +1,20 @@
+@page "/admin"
+@layout AdminLayout
+@attribute [Authorize(Roles = "Admin")]
+
+<h1>Admin dashboard</h1>
+<p class="muted">Manage products and monitor store data.</p>
+
+<div class="grid">
+    <div class="card card-pad" style="grid-column: span 6;">
+        <h3>Products</h3>
+        <p class="muted">Create, edit, delete, and manage images.</p>
+        <a class="btn btn-primary" href="/admin/products">Go to products</a>
+    </div>
+    <div class="card card-pad" style="grid-column: span 6;">
+        <h3>Security</h3>
+        <p class="muted">Admin-only access is enforced using JWT roles.</p>
+        <p class="muted">Seed admin: <code>admin@tiloiarzon.local</code></p>
+    </div>
+</div>
+

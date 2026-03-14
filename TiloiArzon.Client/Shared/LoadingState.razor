@@ -1,0 +1,13 @@
+@if (Show)
+{
+    <div class="loading">
+        <div class="spinner" aria-hidden="true"></div>
+        <span class="muted">@Text</span>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Show { get; set; } = true;
+    [Parameter] public string Text { get; set; } = "Loading…";
+}
+

@@ -1,0 +1,5 @@
+{
+    "chatgpt.commentCodeLensEnabled": true,
+    "chatgpt.openOnStartup": true,
+    "git.ignoreLimitWarning": true
+}

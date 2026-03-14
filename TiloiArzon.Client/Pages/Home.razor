@@ -1,0 +1,82 @@
+@page "/"
+@inject ProductsApi ProductsApi
+@inject CartApi CartApi
+@inject FavoritesApi FavoritesApi
+@inject NavigationManager Nav
+
+<div class="card card-pad">
+    <h1>TiloiArzon</h1>
+    <p class="muted">A modern e-commerce prototype built with ASP.NET Core + Blazor WebAssembly.</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary" @onclick="@(() => Nav.NavigateTo("/products"))">Browse products</button>
+        <AuthorizeView Roles="Admin">
+            <button class="btn btn-ghost" @onclick="@(() => Nav.NavigateTo("/admin"))">Admin</button>
+        </AuthorizeView>
+    </div>
+</div>
+
+<div style="height:14px"></div>
+
+<h2>Featured</h2>
+
+<LoadingState Show="@_loading" />
+
+@if (!_loading)
+{
+    if (_products.Count == 0)
+    {
+        <EmptyState Title="No products yet" Description="Create products from the Admin panel." />
+    }
+    else
+    {
+        <div class="products-grid">
+            @foreach (var p in _products)
+            {
+                <ProductCard Product="p" Disabled="@_busy"
+                             OnAddToCart="AddToCart"
+                             OnToggleFavorite="ToggleFavorite" />
+            }
+        </div>
+    }
+}
+
+@code {
+    private bool _loading = true;
+    private bool _busy;
+    private List<TiloiArzon.Client.Models.ProductDto> _products = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _products = await ProductsApi.GetAllAsync();
+        _products = _products.Take(8).ToList();
+        _loading = false;
+    }
+
+    private async Task AddToCart(TiloiArzon.Client.Models.ProductDto product)
+    {
+        _busy = true;
+        try
+        {
+            var items = await CartApi.AddAsync(product.Id, 1);
+            if (items.Count == 0) Nav.NavigateTo("/login");
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task ToggleFavorite(TiloiArzon.Client.Models.ProductDto product)
+    {
+        _busy = true;
+        try
+        {
+            var ok = await FavoritesApi.AddAsync(product.Id);
+            if (!ok) Nav.NavigateTo("/login");
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

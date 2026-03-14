@@ -1,0 +1,8 @@
+@page "/access-denied"
+@inject NavigationManager Nav
+
+<div class="container py-5">
+    <h1>Access denied</h1>
+    <p class="muted">You don’t have permission to view this page.</p>
+    <button class="btn btn-primary" @onclick="@(() => Nav.NavigateTo("/login"))">Go to login</button>
+</div>

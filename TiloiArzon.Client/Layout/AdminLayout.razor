@@ -1,0 +1,18 @@
+@inherits LayoutComponentBase
+@layout MainLayout
+
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <div class="admin-title">Admin</div>
+        <nav class="admin-nav">
+            <NavLink href="/admin" Match="NavLinkMatch.All">Dashboard</NavLink>
+            <NavLink href="/admin/products">Products</NavLink>
+            <NavLink href="/admin/products/new">Create product</NavLink>
+        </nav>
+    </aside>
+
+    <section class="admin-content">
+        @Body
+    </section>
+</div>
+

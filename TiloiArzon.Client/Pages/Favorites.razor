@@ -1,0 +1,84 @@
+@page "/favorites"
+@attribute [Authorize]
+@inject FavoritesApi FavoritesApi
+@inject CartApi CartApi
+@inject AppUrls Urls
+@inject NavigationManager Nav
+
+<h1>Favorites</h1>
+<p class="muted">Your saved products.</p>
+
+<LoadingState Show="@_loading" />
+
+@if (!_loading)
+{
+    if (_favorites.Count == 0)
+    {
+        <EmptyState Title="No favorites yet" Description="Add products to favorites from the catalog." />
+    }
+    else
+    {
+        <div class="products-grid">
+            @foreach (var f in _favorites)
+            {
+                <div class="product-card">
+                    <button class="product-media" @onclick="@(() => Nav.NavigateTo($"/products/{f.ProductId}"))">
+                        <img src="@Image(f.ImageUrl)" alt="@f.ProductName" loading="lazy" />
+                    </button>
+                    <div class="product-body">
+                        <div class="product-name">@f.ProductName</div>
+                        <div class="product-meta">
+                            <span class="price">@f.ProductPrice.ToString("C")</span>
+                            <span class="badge">Favorite</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary" disabled="@_busy" @onclick="() => AddToCart(f.ProductId)">Add to cart</button>
+                            <button class="btn btn-ghost" disabled="@_busy" @onclick="() => Remove(f.Id)">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    private bool _loading = true;
+    private bool _busy;
+    private List<TiloiArzon.Client.Models.FavoriteDto> _favorites = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _favorites = await FavoritesApi.GetAllAsync();
+        _loading = false;
+    }
+
+    private async Task Remove(int favoriteId)
+    {
+        _busy = true;
+        try
+        {
+            await FavoritesApi.RemoveAsync(favoriteId);
+            _favorites = await FavoritesApi.GetAllAsync();
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task AddToCart(int productId)
+    {
+        _busy = true;
+        try
+        {
+            await CartApi.AddAsync(productId, 1);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private string Image(string? url) => string.IsNullOrWhiteSpace(url) ? "/images/default-product.svg" : Urls.ResolveApiRelative(url);
+}

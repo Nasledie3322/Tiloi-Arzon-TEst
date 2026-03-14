@@ -1,0 +1,20 @@
+<div class="empty">
+    <h3>@Title</h3>
+    @if (!string.IsNullOrWhiteSpace(Description))
+    {
+        <p class="muted">@Description</p>
+    }
+    @if (ChildContent != null)
+    {
+        <div class="empty-actions">
+            @ChildContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Nothing here yet";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
+

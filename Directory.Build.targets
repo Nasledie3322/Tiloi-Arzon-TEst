@@ -1,0 +1,14 @@
+<Project>
+  <!--
+    Restore/build can fail in restricted environments when MSBuild/NuGet try to evaluate multiple
+    projects concurrently (e.g., Blazor WASM + static web assets graph evaluation). Force the
+    restore MSBuild tasks to run serially to improve reliability.
+
+    Note: Workload resolver must still be disabled via `Directory.Build.rsp` because it is
+    imported too early for targets/props to affect it.
+  -->
+  <PropertyGroup>
+    <RestoreBuildInParallel>false</RestoreBuildInParallel>
+    <RestoreDisableParallel>true</RestoreDisableParallel>
+  </PropertyGroup>
+</Project>

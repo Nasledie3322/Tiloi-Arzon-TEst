@@ -1,0 +1,119 @@
+@page "/cart"
+@attribute [Authorize]
+@inject CartApi CartApi
+@inject OrdersApi OrdersApi
+@inject AppUrls Urls
+@inject NavigationManager NavManager
+
+<h1>Cart</h1>
+<p class="muted">Review items and checkout.</p>
+
+<LoadingState Show="@_loading" />
+
+@if (!_loading)
+{
+    if (_items.Count == 0)
+    {
+        <EmptyState Title="Your cart is empty" Description="Browse products and add something you like." />
+    }
+    else
+    {
+        <div class="card card-pad">
+            <div style="display:grid; gap:12px;">
+                @foreach (var item in _items)
+                {
+                    <div style="display:flex; gap:12px; align-items:center; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px;">
+                        <img src="@Image(item.ImageUrl)" style="width:64px; height:64px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,0.10);" />
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">@item.ProductName</div>
+                            <div class="muted">@item.ProductPrice.ToString("C")</div>
+                        </div>
+
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <button class="btn btn-ghost" disabled="@_busy" @onclick="() => ChangeQty(item.ProductId, item.Quantity - 1)">-</button>
+                            <div style="min-width:32px; text-align:center; font-weight:800;">@item.Quantity</div>
+                            <button class="btn btn-ghost" disabled="@_busy" @onclick="() => ChangeQty(item.ProductId, item.Quantity + 1)">+</button>
+                        </div>
+
+                        <div style="width:110px; text-align:right;">
+                            <div class="price">@((item.ProductPrice * item.Quantity).ToString("C"))</div>
+                        </div>
+
+                        <button class="btn" style="border-color: rgba(239,68,68,0.35);" disabled="@_busy" @onclick="() => Remove(item.ProductId)">Remove</button>
+                    </div>
+                }
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <div class="muted">Total</div>
+                    <div class="price" style="font-size:1.25rem;">@Total.ToString("C")</div>
+                </div>
+
+                <button class="btn btn-primary" disabled="@_busy" @onclick="Checkout">
+                    @(_busy ? "Processing…" : "Checkout")
+                </button>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private bool _loading = true;
+    private bool _busy;
+    private List<TiloiArzon.Client.Models.CartItemDto> _items = new();
+
+    private decimal Total => _items.Sum(i => i.ProductPrice * i.Quantity);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _items = await CartApi.GetAsync();
+        _loading = false;
+    }
+
+    private async Task ChangeQty(int productId, int qty)
+    {
+        _busy = true;
+        try
+        {
+            _items = await CartApi.SetQuantityAsync(productId, qty);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task Remove(int productId)
+    {
+        _busy = true;
+        try
+        {
+            _items = await CartApi.RemoveAsync(productId);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task Checkout()
+    {
+        _busy = true;
+        try
+        {
+            var order = await OrdersApi.CheckoutAsync();
+            if (order != null)
+            {
+                _items.Clear();
+                NavManager.NavigateTo("/orders");
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private string Image(string? url) => string.IsNullOrWhiteSpace(url) ? "/images/default-product.svg" : Urls.ResolveApiRelative(url);
+}

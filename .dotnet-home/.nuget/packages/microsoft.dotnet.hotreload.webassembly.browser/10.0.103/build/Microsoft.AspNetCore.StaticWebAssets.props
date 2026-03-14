@@ -1,0 +1,24 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\Microsoft.DotNet.HotReload.WebAssembly.Browser.99zm1jdh75.lib.module.js'))">
+      <SourceType>Package</SourceType>
+      <SourceId>Microsoft.DotNet.HotReload.WebAssembly.Browser</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/Microsoft.DotNet.HotReload.WebAssembly.Browser</BasePath>
+      <RelativePath>Microsoft.DotNet.HotReload.WebAssembly.Browser.99zm1jdh75.lib.module.js</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName>JSModule</AssetTraitName>
+      <AssetTraitValue>JSLibraryModule</AssetTraitValue>
+      <Fingerprint>99zm1jdh75</Fingerprint>
+      <Integrity>A8e6zZwhOqf7lDQqbbCYcAUv4wGE9aQxOo4WyYxR//0=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <FileLength>1862</FileLength>
+      <LastWriteTime>Sun, 25 Jan 2026 16:06:14 GMT</LastWriteTime>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\Microsoft.DotNet.HotReload.WebAssembly.Browser.99zm1jdh75.lib.module.js'))</OriginalItemSpec>
+    </StaticWebAsset>
+  </ItemGroup>
+</Project>

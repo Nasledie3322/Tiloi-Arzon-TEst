@@ -1,0 +1,5 @@
+-p:MSBuildEnableWorkloadResolver=false
+-p:BuildInParallel=false
+-p:RestoreBuildInParallel=false
+-p:RestoreDisableParallel=true
+-p:RestoreUseStaticGraphEvaluation=false

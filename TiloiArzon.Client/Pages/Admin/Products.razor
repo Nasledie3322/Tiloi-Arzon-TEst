@@ -1,0 +1,101 @@
+@page "/admin/products"
+@layout AdminLayout
+@attribute [Authorize(Roles = "Admin")]
+@inject ProductsApi ProductsApi
+@inject AdminProductsApi AdminProductsApi
+@inject NavigationManager Nav
+
+<div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap;">
+    <div>
+        <h1>Products</h1>
+        <p class="muted">Manage the product catalog.</p>
+    </div>
+    <a class="btn btn-primary" href="/admin/products/new">Create product</a>
+</div>
+
+<div class="card card-pad">
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <InputText class="input" style="flex:1; min-width:240px;" @bind-Value="_search" @bind-Value:event="oninput" placeholder="Search…" />
+        <button class="btn btn-ghost" disabled="@_loading" @onclick="Reload">Refresh</button>
+    </div>
+</div>
+
+<div style="height:14px"></div>
+
+<LoadingState Show="@_loading" />
+
+@if (!_loading)
+{
+    if (_products.Count == 0)
+    {
+        <EmptyState Title="No products" Description="Create your first product." />
+    }
+    else
+    {
+        <div class="card card-pad" style="overflow:auto;">
+            <table class="table table-dark table-hover" style="margin:0;">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">Id</th>
+                        <th>Name</th>
+                        <th style="width:140px;">Price</th>
+                        <th style="width:110px;">Stock</th>
+                        <th style="width:220px;">Category</th>
+                        <th style="width:220px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Filtered)
+                    {
+                        <tr>
+                            <td>@p.Id</td>
+                            <td>@p.Name</td>
+                            <td>@p.Price.ToString("C")</td>
+                            <td>@p.StockQuantity</td>
+                            <td>@p.CategoryName</td>
+                            <td style="text-align:right;">
+                                <button class="btn btn-ghost" disabled="@_busy" @onclick="@(() => Nav.NavigateTo($"/admin/products/{p.Id}/edit"))">Edit</button>
+                                <button class="btn" style="border-color: rgba(239,68,68,0.35);" disabled="@_busy" @onclick="() => Delete(p.Id)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@code {
+    private bool _loading = true;
+    private bool _busy;
+    private string? _search;
+    private List<TiloiArzon.Client.Models.ProductDto> _products = new();
+
+    private IEnumerable<TiloiArzon.Client.Models.ProductDto> Filtered =>
+        string.IsNullOrWhiteSpace(_search)
+            ? _products
+            : _products.Where(p => p.Name.Contains(_search, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync() => await Reload();
+
+    private async Task Reload()
+    {
+        _loading = true;
+        _products = await ProductsApi.GetAllAsync();
+        _loading = false;
+    }
+
+    private async Task Delete(int id)
+    {
+        _busy = true;
+        try
+        {
+            await AdminProductsApi.DeleteAsync(id);
+            await Reload();
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

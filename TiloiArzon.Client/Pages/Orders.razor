@@ -1,0 +1,69 @@
+@page "/orders"
+@attribute [Authorize]
+@inject OrdersApi OrdersApi
+@inject AppUrls Urls
+
+<h1>Orders</h1>
+<p class="muted">Your order history.</p>
+
+<LoadingState Show="@_loading" />
+
+@if (!_loading)
+{
+    if (_orders.Count == 0)
+    {
+        <EmptyState Title="No orders yet" Description="Checkout your cart to create your first order." />
+    }
+    else
+    {
+        <div style="display:grid; gap:14px;">
+            @foreach (var o in _orders.OrderByDescending(x => x.CreatedAt))
+            {
+                <div class="card card-pad">
+                    <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:baseline;">
+                        <div>
+                            <div style="font-weight:900;">Order #@o.Id</div>
+                            <div class="muted">@o.CreatedAt.ToLocalTime().ToString("g")</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="badge">@o.Status</div>
+                            <div class="price" style="margin-top:6px;">@o.TotalPrice.ToString("C")</div>
+                        </div>
+                    </div>
+
+                    @if (o.Items.Count > 0)
+                    {
+                        <div style="display:grid; gap:10px; margin-top:14px;">
+                            @foreach (var i in o.Items)
+                            {
+                                <div style="display:flex; gap:10px; align-items:center; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px;">
+                                    <img src="@Image(i.ImageUrl)" style="width:52px; height:52px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,0.10);" />
+                                    <div style="flex:1; min-width:0;">
+                                        <div style="font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">@((i.ProductName ?? $"Product #{i.ProductId}"))</div>
+                                        <div class="muted">Qty: @i.Quantity</div>
+                                    </div>
+                                    <div style="text-align:right; width:110px;">
+                                        <div class="price">@((i.Price ?? 0m).ToString("C"))</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    private bool _loading = true;
+    private List<TiloiArzon.Client.Models.OrderDto> _orders = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _orders = await OrdersApi.GetMyOrdersAsync();
+        _loading = false;
+    }
+
+    private string Image(string? url) => string.IsNullOrWhiteSpace(url) ? "/images/default-product.svg" : Urls.ResolveApiRelative(url);
+}

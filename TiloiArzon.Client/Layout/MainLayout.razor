@@ -1,0 +1,52 @@
+@inherits LayoutComponentBase
+@inject AuthApi AuthApi
+@inject NavigationManager Nav
+
+<div class="app-shell">
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a class="brand" href="/">TiloiArzon</a>
+
+            <nav class="nav-links">
+                <NavLink href="/" Match="NavLinkMatch.All">Home</NavLink>
+                <NavLink href="/products">Products</NavLink>
+                <NavLink href="/favorites">Favorites</NavLink>
+                <NavLink href="/cart">Cart</NavLink>
+                <NavLink href="/orders">Orders</NavLink>
+                <AuthorizeView Roles="Admin">
+                    <NavLink href="/admin">Admin</NavLink>
+                </AuthorizeView>
+            </nav>
+
+            <div class="nav-actions">
+                <AuthorizeView Context="auth">
+                    <Authorized>
+                        <span class="badge">@((auth.User.FindFirst("sub")?.Value) ?? (auth.User.Identity?.Name ?? "Account"))</span>
+                        <button class="btn btn-ghost" @onclick="Logout">Logout</button>
+                    </Authorized>
+                    <NotAuthorized>
+                        <NavLink class="btn btn-primary" href="/login">Login</NavLink>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </header>
+
+    <main class="container page">
+        @Body
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <span class="muted">© 2026 TiloiArzon</span>
+        </div>
+    </footer>
+</div>
+
+@code {
+    private async Task Logout()
+    {
+        await AuthApi.LogoutAsync();
+        Nav.NavigateTo("/");
+    }
+}

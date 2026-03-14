@@ -1,0 +1,96 @@
+@page "/products/{Id:int}"
+@inject ProductsApi ProductsApi
+@inject CartApi CartApi
+@inject FavoritesApi FavoritesApi
+@inject NavigationManager Nav
+@inject AppUrls Urls
+
+<LoadingState Show="@_loading" />
+
+@if (!_loading)
+{
+    if (_product == null)
+    {
+        <EmptyState Title="Product not found" Description="This product may have been removed." />
+    }
+    else
+    {
+        <div class="grid">
+            <div style="grid-column: span 6;">
+                <div class="card">
+                    <img src="@Image" alt="@_product.Name" style="width:100%; height:420px; object-fit:cover; display:block;" />
+                </div>
+            </div>
+            <div style="grid-column: span 6;">
+                <div class="card card-pad">
+                    <h1>@_product.Name</h1>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <span class="price">@_product.Price.ToString("C")</span>
+                        @if (!string.IsNullOrWhiteSpace(_product.CategoryName))
+                        {
+                            <span class="badge">@_product.CategoryName</span>
+                        }
+                        <span class="badge">In stock: @_product.StockQuantity</span>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(_product.Description))
+                    {
+                        <p class="muted" style="margin-top:12px;">@_product.Description</p>
+                    }
+
+                    <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+                        <button class="btn btn-primary" disabled="@_busy" @onclick="AddToCart">Add to cart</button>
+                        <button class="btn btn-ghost" disabled="@_busy" @onclick="Favorite">Add to favorites</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private bool _loading = true;
+    private bool _busy;
+    private TiloiArzon.Client.Models.ProductDto? _product;
+
+    private string Image => string.IsNullOrWhiteSpace(_product?.ImageUrl) ? "/images/default-product.svg" : Urls.ResolveApiRelative(_product!.ImageUrl);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        _product = await ProductsApi.GetByIdAsync(Id);
+        _loading = false;
+    }
+
+    private async Task AddToCart()
+    {
+        if (_product == null) return;
+        _busy = true;
+        try
+        {
+            var items = await CartApi.AddAsync(_product.Id, 1);
+            if (items.Count == 0) Nav.NavigateTo("/login");
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task Favorite()
+    {
+        if (_product == null) return;
+        _busy = true;
+        try
+        {
+            var ok = await FavoritesApi.AddAsync(_product.Id);
+            if (!ok) Nav.NavigateTo("/login");
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}
