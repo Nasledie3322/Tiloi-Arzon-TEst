@@ -5,7 +5,7 @@ var e=!1;const t=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,
   "mainAssemblyName": "TiloiArzon.Client",
   "applicationEnvironment": "Development",
   "resources": {
-    "hash": "sha256-4gh/vnNkZaj3nYdrnILTfIPE4Pn42Cg4vQT/npblcIs=",
+    "hash": "sha256-s4mppoEp+5C9pdsmOLnYz2KohTi19IYXDUmanqj47Xc=",
     "jsModuleNative": [
       {
         "name": "dotnet.native.69poregybn.js"
@@ -1248,16 +1248,16 @@ var e=!1;const t=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,
       },
       {
         "virtualPath": "TiloiArzon.Client.wasm",
-        "name": "TiloiArzon.Client.jkp278tu1i.wasm",
-        "integrity": "sha256-88QzxEgVsyh3mvUiHOoRHiimFslegb1GtG/YqrXrptk=",
+        "name": "TiloiArzon.Client.5yxl7qkfeg.wasm",
+        "integrity": "sha256-Ha4I+slfbKkq0Cu527+TFmoEqKXS5yvvrTvvfu0vLZ4=",
         "cache": "force-cache"
       }
     ],
     "pdb": [
       {
         "virtualPath": "TiloiArzon.Client.pdb",
-        "name": "TiloiArzon.Client.u4hfjnomw1.pdb",
-        "integrity": "sha256-frONSMQAycsZI44/h3yd+x/VnJvKtNisfRjndzoZg3U=",
+        "name": "TiloiArzon.Client.hh7gku9g6b.pdb",
+        "integrity": "sha256-5eUImXzh5M4HPEFFp0BiFpL5RUlJrDhBkOvI9TKhrHc=",
         "cache": "force-cache"
       }
     ],

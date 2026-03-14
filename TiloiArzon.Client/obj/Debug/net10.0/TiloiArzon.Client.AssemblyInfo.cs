@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TiloiArzon.Client")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bcffd168dcec7e7d550f24270db8b8964a289640")]
 [assembly: System.Reflection.AssemblyProductAttribute("TiloiArzon.Client")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TiloiArzon.Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
