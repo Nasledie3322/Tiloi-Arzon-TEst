@@ -37,7 +37,7 @@
                             @foreach (var i in o.Items)
                             {
                                 <div style="display:flex; gap:10px; align-items:center; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px;">
-                                    <img src="@Image(i.ImageUrl)" style="width:52px; height:52px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,0.10);" />
+                                    <img src="@Image(i.ImageUrl)" style="width:52px; height:52px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,0.10);" onerror="this.onerror=null;this.src='/images/default-product.svg';" />
                                     <div style="flex:1; min-width:0;">
                                         <div style="font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">@((i.ProductName ?? $"Product #{i.ProductId}"))</div>
                                         <div class="muted">Qty: @i.Quantity</div>

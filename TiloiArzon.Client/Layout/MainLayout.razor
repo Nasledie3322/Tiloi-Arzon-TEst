@@ -5,7 +5,7 @@
 <div class="app-shell">
     <header class="topbar">
         <div class="container topbar-inner">
-            <a class="brand" href="/">TiloiArzon</a>
+            <NavLink class="brand" href="/" Match="NavLinkMatch.All">TiloiArzon</NavLink>
 
             <nav class="nav-links">
                 <NavLink href="/" Match="NavLinkMatch.All">Home</NavLink>
@@ -21,10 +21,11 @@
             <div class="nav-actions">
                 <AuthorizeView Context="auth">
                     <Authorized>
-                        <span class="badge">@((auth.User.FindFirst("sub")?.Value) ?? (auth.User.Identity?.Name ?? "Account"))</span>
+                        <span class="badge">@((auth.User.FindFirst("email")?.Value) ?? (auth.User.Identity?.Name ?? "Account"))</span>
                         <button class="btn btn-ghost" @onclick="Logout">Logout</button>
                     </Authorized>
                     <NotAuthorized>
+                        <NavLink class="btn btn-ghost" href="/register">Register</NavLink>
                         <NavLink class="btn btn-primary" href="/login">Login</NavLink>
                     </NotAuthorized>
                 </AuthorizeView>

@@ -23,7 +23,7 @@
             {
                 <div class="product-card">
                     <button class="product-media" @onclick="@(() => Nav.NavigateTo($"/products/{f.ProductId}"))">
-                        <img src="@Image(f.ImageUrl)" alt="@f.ProductName" loading="lazy" />
+                        <img src="@Image(f.ImageUrl)" alt="@f.ProductName" loading="lazy" onerror="this.onerror=null;this.src='/images/default-product.svg';" />
                     </button>
                     <div class="product-body">
                         <div class="product-name">@f.ProductName</div>

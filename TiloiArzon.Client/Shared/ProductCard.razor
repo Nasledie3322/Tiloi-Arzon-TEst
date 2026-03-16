@@ -4,7 +4,7 @@
 
 <div class="product-card">
     <button class="product-media" @onclick="Open">
-        <img src="@Image" alt="@Product.Name" loading="lazy" />
+        <img src="@Image" alt="@Product.Name" loading="lazy" onerror="this.onerror=null;this.src='/images/default-product.svg';" />
     </button>
 
     <div class="product-body">

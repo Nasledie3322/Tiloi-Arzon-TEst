@@ -1,4 +1,1 @@
-using BenchmarkDotNet.Running;
-
-BenchmarkRunner.Run<PerfGetBenchmarks>();
-
+// Entry point is in WebApi.Benchmarks/Bechmaste.cs
